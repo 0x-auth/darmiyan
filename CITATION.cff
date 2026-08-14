@@ -1,0 +1,44 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+type: software
+title: "Darmiyan: Time as the Cost of Incomplete Self-Reference"
+abstract: >-
+  Formalism and reproduction code for the Darmiyan framework: proper duration as
+  coordinate time filtered by non-return, phi as the minimal departure from identity
+  that still generates a sequence, irreversibility separated from entropy production,
+  and controlled filesystem measurements of self-referential traversal cost.
+authors:
+  - family-names: Srivastava
+    given-names: Abhishek
+    orcid: "https://orcid.org/0009-0006-7495-5039"
+    affiliation: "Independent Researcher"
+    alias: bitsabhi
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.21799483
+    description: Concept DOI (always resolves to the latest version)
+  - type: doi
+    value: 10.5281/zenodo.21926394
+    description: Version 2 (corrected)
+  - type: doi
+    value: 10.5281/zenodo.19131239
+    description: The Measurable Cost of Self-Reference (source of the timing data)
+repository-code: "https://github.com/0x-auth/time-redfined"
+url: "https://doi.org/10.5281/zenodo.21799483"
+license: CC-BY-4.0
+version: "2"
+date-released: "2026-08-14"
+keywords:
+  - self-reference
+  - arrow of time
+  - golden ratio
+  - fixed points
+  - continued fractions
+  - Lucas numbers
+  - irreversibility
+  - Kolmogorov-Sinai entropy
+  - Gauss map
+  - dynamical systems
+  - computational cost
+  - philosophy of time
+  - darmiyan

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schema.org/Person",
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Abhishek Srivastava",
+  "alternateName": "bitsabhi",
+  "jobTitle": "Independent Researcher",
+  "email": "bits.abhi@gmail.com",
+  "identifier": {
+    "@type": "PropertyValue",
+    "propertyID": "ORCID",
+    "value": "0009-0006-7495-5039",
+    "url": "https://orcid.org/0009-0006-7495-5039"
+  },
+  "alumniOf": {
+    "@type": "CollegeOrUniversity",
+    "name": "Birla Institute of Technology and Science, Pilani"
+  },
+  "knowsAbout": [
+    "dynamical systems",
+    "self-reference and incompleteness",
+    "number theory",
+    "cryptography",
+    "distributed systems",
+    "backend and infrastructure engineering"
+  ],
+  "sameAs": [
+    "https://orcid.org/0009-0006-7495-5039",
+    "https://github.com/bitsabhi",
+    "https://github.com/0x-auth",
+    "https://zenodo.org/search?q=metadata.creators.person_or_org.identifiers.identifier%3A%220009-0006-7495-5039%22",
+    "https://doi.org/10.5281/zenodo.21799483"
+  ],
+  "mainEntityOfPage": "https://github.com/0x-auth/time-redfined"
+}
