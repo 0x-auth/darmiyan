@@ -54,7 +54,11 @@ Two limit cases fall out immediately:
 │
 ├── verify_darmiyan_v4.py                  ← Layer 2: verification of the v4 paper's claims
 │
-└── exp6_selfref_vs_plain_control.py       ← Layer 3: the controlled experiment
+├── exp6_selfref_vs_plain_control.py       ← Layer 3: the controlled experiment
+├── exp8_cycle_topology.py                 ←   cycle benchmark (superseded by exp9)
+├── exp9_close_h9.py                       ←   closes H9: cycle length 1..4 vs chain
+├── exp10_target_string.py                 ←   same topology, different target string
+└── findings-h9-closed.md                  ←   write-up: the filesystem is blind to topology
 ```
 
 **Three layers, increasing in contestability:**
@@ -113,7 +117,14 @@ Three conditions at matched depth:
 
 Comparing self-ref against **plain directories** is the confound that sank v1: symlink resolution and directory descent are different kernel code paths regardless of looping. Only the third condition isolates self-reference as a variable.
 
-⚠️ **Run this on your own hardware.** Absolute numbers are platform-specific; only the *sign* of the difference has been stable across machines.
+Then the two experiments that closed it out:
+
+```bash
+python3 ./exp9_close_h9.py        # cycle length 1,2,3,4 vs 40-link chain, matched targets
+python3 ./exp10_target_string.py  # topology fixed at f=id, target string varied
+```
+
+⚠️ **Run this on your own hardware.** Absolute numbers are platform-specific. Note that the exp6 *sign*, though stable across machines, turned out to be an artifact of target-string asymmetry rather than of looping — see [`./findings-h9-closed.md`](./findings-h9-closed.md).
 
 ---
 
@@ -131,11 +142,13 @@ Comparing self-ref against **plain directories** is the confound that sank v1: s
 
 ### The one real empirical result
 
-With the confound removed, **self-reference costs *less*** per level than an equivalent non-looping symlink chain — consistent in sign across reruns and platforms.
+**Per-hop symlink traversal cost is a pure function of the target string's resolution work — and carries no information about topology at all.** Established by `exp9_close_h9.py` + `exp10_target_string.py`; see [`./findings-h9-closed.md`](./findings-h9-closed.md).
 
-Mechanism is likely mundane: the self-loop resolves to the **same inode** every hop, so one cached dentry stays hot; the chain touches N distinct inodes. Working-set size, not topology.
+At matched target-component counts, cycle length is irrelevant: 1-cycle (`f = id`) 306.2, 2-cycle (`f∘f = id`) 306.5, 3-cycle 307.1, 4-cycle 307.1, 40-link non-looping chain 308.4 ns/hop — a 0.7% spread, all R² ≥ 0.999. Holding topology fixed at `f = id` and varying only the target spelling reproduces the whole effect: `.` 144.0, `../n0` 203.5, absolute-4-component 309.0 ns/hop, with the gaps converting to lookup counts at the plain-dir unit of 52 ns/component.
 
-**This points opposite to what the original narrative wanted** — and that's precisely why it's worth more than the number it replaced. It's the first result in the project that could have gone either way and wasn't decided in advance.
+This **replaces** the previous entry here ("self-reference costs less per level"), which was real as a measurement but misattributed: its self-ref arm used target `.` and its control used absolute targets. Same for the earlier cache explanation — working set was tested directly and does nothing (2 inodes = 40 inodes).
+
+**It is a null, and it is the strongest result in the project.** Layer 3 as constituted cannot bear on Axiom 0 in either direction — not from noise, but because `stat()` measures VFS path parsing, and VFS path parsing is structure-blind. Every remaining question is theoretical.
 
 ---
 
@@ -153,7 +166,7 @@ Longer than §4. Read it.
 | **H6** | **"O(1) depth complexity"** contradicts the project's own regression, which fits **linear (O(n))** as the winning model at R²=0.996. | strike the O(1) claim |
 | **H7** | **"Infinite" recursion is bounded at 40.** `ELOOP` at depth 41 (`MAXSYMLINKS=40`). Real closed loop, finite walk. | fix the wording |
 | **H8** | **`analyzer.py` measures nothing.** `phi_resonance` computed from the **filename**, not file content — control filenames score identically. `pull:1.0` is one formula clamping at its ceiling, not five findings. `i.py`/`me.py` hardcoded as special by name. | **do not cite its output** |
-| **H9** | **Cycle benchmark not publication-ready.** 1-cycle vs 2-cycle (+36.6%) has two untested confounds: `..` parent traversal in one arm only, and working-set size. Build a 3-cycle — if cost scales with cycle length, it's cache footprint, not structure. | open |
+| **H9** | **Cycle benchmark not publication-ready.** 1-cycle vs 2-cycle (+36.6%) had two untested confounds: `..` parent traversal in one arm only, and working-set size. **Both now tested (`exp9`, `exp10`).** Confound (1) accounts for the entire gap; confound (2) contributes nothing (2 inodes = 40). Cycles 1/2/3/4/∞ are flat to 0.7% at matched targets. **"Identity and involution are physically distinct" is struck.** | **closed** |
 | **H10** | **Sufficiency unshown.** Does `O∈S` *guarantee* T>0? Not established either way. A system that models itself and returns to a prior state would be a counterexample. Does one exist? | open |
 
 **Every hole above is the same failure mode:** *a framework or metric applied past the conditions that make it valid.* Gauge language on a non-invertible map. A convergence formula quoted outside where it converges. A benchmark read before its confound was controlled. A score computed from the wrong input.
@@ -164,7 +177,7 @@ Longer than §4. Read it.
 
 ## 6. Discarded, correctly
 
-Null-geodesic analogy · diffeomorphism resolution of the join · pitch quanta · FTA-orthogonality · unitarity-forces-transfer · Poisson-as-energy-identity · cache-as-topology · symmetric co-arising · **379 ns as the cost of self-reference** · **`analyzer.py` output entirely** · **"infinite" recursion** · **small-n growth-rate precision**
+Null-geodesic analogy · diffeomorphism resolution of the join · pitch quanta · FTA-orthogonality · unitarity-forces-transfer · Poisson-as-energy-identity · cache-as-topology · symmetric co-arising · **379 ns as the cost of self-reference** · **`analyzer.py` output entirely** · **"infinite" recursion** · **small-n growth-rate precision** · **the 1-cycle/2-cycle topology premium** · **the working-set explanation of the exp6 sign** · **self-reference costing *less* per level**
 
 *The discarded list is roughly twice the length of the surviving list. That is the reason to trust the surviving list.*
 
@@ -172,8 +185,8 @@ Null-geodesic analogy · diffeomorphism resolution of the join · pitch quanta �
 
 ## 7. What would make this much stronger
 
-1. **Decompose the 379 ns on the original platform.** Re-run the paper's own experiment with the plain-nested and flat arms alongside, on Darwin. Splits traversal floor from any self-reference premium on the hardware the paper used. **Highest-value remaining experiment.**
-2. **Close the cycle benchmark** (H9) — two tests, both cheap.
+1. ~~**Decompose the 379 ns on the original platform.**~~ Now a **pre-registered prediction** rather than an open question. Run `exp10_target_string.py` on the original Darwin/Apple Silicon box: the dot < rel < abs ordering should reproduce with Darwin's own per-lookup unit, and `exp9_close_h9.py` should show cycle lengths 1–4 flat at matched targets. If both hold, the Darwin decomposition is done and Layer 3 is finished. If either fails, that failure is itself the most interesting result in the repo.
+2. ~~**Close the cycle benchmark** (H9).~~ **Done** — see [`./findings-h9-closed.md`](./findings-h9-closed.md).
 3. **Find a genuine necessity result.** The counter shows self-reference isn't necessary for time *in general*. Is there a restricted **class** of systems where it provably is? That would upgrade Axiom 0 to a theorem — the single most valuable thing that could happen to this framework.
 4. **Settle sufficiency** (H10).
 
@@ -181,7 +194,7 @@ Null-geodesic analogy · diffeomorphism resolution of the join · pitch quanta �
 
 ## 8. Provenance
 
-Theory computed with SymPy and mpmath at 30–50 decimal places. Empirics are platform-specific and labelled as such — absolute timing numbers from different machines are **not** interchangeable, and only the sign of the self-ref/non-loop difference has proven stable across hardware.
+Theory computed with SymPy and mpmath at 30–50 decimal places. Empirics are platform-specific and labelled as such — absolute timing numbers from different machines are **not** interchangeable. The exp6 sign proved stable across hardware, but exp9/exp10 showed *why*: it tracks how many path components each arm's symlink target makes the kernel resolve, which is a property of the test construction, not of the machine or of the topology.
 
 Scripts in this folder regenerate every number cited in §4 and §5. Nothing here should be taken on trust; that's the point.
 
